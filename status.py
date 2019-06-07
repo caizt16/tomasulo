@@ -8,12 +8,17 @@ class InstructionStatus:
 class ReservationStation:
     types = 3
     ARS, MRS, LB = range(types)
+    name = ['ARS', 'MRS', 'LB']
+    cnt = [0 for _ in range(types)]
 
     def __init__(self, rs_type):
+        ReservationStation.cnt[rs_type] += 1
+
+        self.index = ReservationStation.cnt[rs_type]
         self.type = rs_type
+        self.busy = False
 
         if self.type == ReservationStation.LB:
-            self.busy = False
             self.address = None
         else:
             self.op = None
@@ -21,6 +26,9 @@ class ReservationStation:
             self.vk = None
             self.qj = None
             self.qk = None
+
+    def get_name(self):
+        return ReservationStation.name[self.type]+str(self.index)
 
 class Register:
     def __init__(self):

@@ -8,6 +8,7 @@ class Simulator:
         self.rs = None
         self.reg = None
         self.fu = None
+        self.controller = Controller(self)
 
     def __check_runnable(self):
         assert(type(self.inst_status) == list)
@@ -69,7 +70,10 @@ class Simulator:
         self.add_fu(FunctionUnit.LOAD, load_n)
 
     def __step(self):
-        Controller.run_one_cycle(self)
+        self.controller.run_one_cycle()
+
+    def is_finished(self):
+        return False
 
     def run(self, cycles:int=-1):
         self.__check_runnable()
@@ -89,14 +93,47 @@ class Simulator:
             return False
         self.__step()
 
+    def print_inst_status(self):
+        print('\t\t\t\tissue\texe\twr\n')
+        for inst in self.inst_status:
+            print('%30s\t%d\t%d\t%d\n' % (inst.inst[:-1], inst.issue, inst.exe, inst.wr))
+
+    def print_rs_status(self):
+        print('\tBusy\top\tvj\tvk\tqj\tqk\n')
+        for i, rs in enumerate(self.rs[0]):
+            print('%s\t%s\n' % (rs.get_name(), rs.busy))
+        for i, rs in enumerate(self.rs[1]):
+            print('%s\t%s\n' % (rs.get_name(), rs.busy))
+        print('\tBusy\tAddress\n')
+        for i, rs in enumerate(self.rs[2]):
+            print('%s\t%s\t%s\n' % (rs.get_name(), rs.busy, rs.address))
+
+    def print_reg_status(self):
+        print('\t', end = '')
+        for _ in range(5):
+            print('F%d\t' % (_), end = '')
+        print('\n')
+
+        print('State\t', end = '')
+        for _ in range(5):
+            name = '' if self.reg[_].stat == None else self.reg[_].stat.get_name()
+            print('%s\t' % name, end = '')
+        print('\n')
+
+    def print_status(self):
+        self.print_inst_status()
+        self.print_rs_status()
+        self.print_reg_status()
 
 def main():
     sim = Simulator()
     sim.init_rs(6, 3, 3)
     sim.init_fu(3, 2, 2)
     sim.add_reg(32)
-    sim.read_inst('test1.nel')
-    sim.run()
+    sim.read_inst('test0.nel')
+    for _ in range(4):
+        sim.step()
+    sim.print_status()
 
 if __name__ == '__main__':
     main()
