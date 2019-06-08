@@ -38,6 +38,7 @@ class Simulator:
         with open(filename, 'r') as f:
             for line in f.readlines():
                 self.inst_status.append(InstructionStatus(line))
+        self.inst_status[-1].inst += '\n'
 
     def add_rs(self, rs_type, num):
         if self.rs == None:
@@ -62,7 +63,8 @@ class Simulator:
         if self.fu == None:
             self.fu = [[] for _ in range(FunctionUnit.types)]
 
-        self.fu[fu_type].append(FunctionUnit(fu_type))
+        for _ in range(num):
+            self.fu[fu_type].append(FunctionUnit(fu_type))
 
     def init_fu(self, add_n, mult_n, load_n):
         self.add_fu(FunctionUnit.ADD, add_n)
@@ -101,9 +103,9 @@ class Simulator:
     def print_rs_status(self):
         print('\tBusy\top\tvj\tvk\tqj\tqk\n')
         for i, rs in enumerate(self.rs[0]):
-            print('%s\t%s\n' % (rs.get_name(), rs.busy))
+            print('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (rs.get_name(), rs.busy, rs.op, rs.vj, rs.vk, rs.qj, rs.qk))
         for i, rs in enumerate(self.rs[1]):
-            print('%s\t%s\n' % (rs.get_name(), rs.busy))
+            print('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (rs.get_name(), rs.busy, rs.op, rs.vj, rs.vk, rs.qj, rs.qk))
         print('\tBusy\tAddress\n')
         for i, rs in enumerate(self.rs[2]):
             print('%s\t%s\t%s\n' % (rs.get_name(), rs.busy, rs.address))
@@ -116,8 +118,11 @@ class Simulator:
 
         print('State\t', end = '')
         for _ in range(5):
-            name = '' if self.reg[_].stat == None else self.reg[_].stat.get_name()
-            print('%s\t' % name, end = '')
+            print('%s\t' % self.reg[_].get_stat_string(), end = '')
+        print('\n')
+        print('Value\t', end = '')
+        for _ in range(5):
+            print('%d\t' % self.reg[_].val, end = '')
         print('\n')
 
     def print_status(self):
@@ -131,7 +136,7 @@ def main():
     sim.init_fu(3, 2, 2)
     sim.add_reg(32)
     sim.read_inst('test0.nel')
-    for _ in range(4):
+    for _ in range(25):
         sim.step()
     sim.print_status()
 
