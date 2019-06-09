@@ -86,10 +86,10 @@ class FunctionUnit:
         if inst_type == 'JUMP':
             return 1
         if inst_type == 'MUL':
-            return 4
+            #return 4
             return 12
         if inst_type == 'DIV':
-            return 4
+            #return 4
             return 40
         if inst_type in ['LD', 'ADD', 'SUB']:
             return 3
