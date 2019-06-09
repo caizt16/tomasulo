@@ -5,6 +5,7 @@ from controller import *
 class Simulator:
     def __init__(self):
         self.inst_status = None
+        self.first = None
         self.rs = None
         self.reg = None
         self.fu = None
@@ -35,10 +36,13 @@ class Simulator:
 
     def read_inst(self, filename):
         self.inst_status = list()
+        self.first = list()
         with open(filename, 'r') as f:
             for line in f.readlines():
                 self.inst_status.append(InstructionStatus(line))
+                self.first.append(InstructionStatus(line))
         self.inst_status[-1].inst += '\n'
+        self.first[-1].inst += '\n'
 
     def add_rs(self, rs_type, num):
         if self.rs == None:
@@ -71,11 +75,28 @@ class Simulator:
         self.add_fu(FunctionUnit.MULT, mult_n)
         self.add_fu(FunctionUnit.LOAD, load_n)
 
+    def is_finished(self):
+        for status in self.first:
+            if status.issue == -1:
+                return False
+            if status.exe == -1:
+                return False
+            if status.wr == -1:
+                return False
+        return True
+
+    def __update_first(self):
+        for i in range(len(self.first)):
+            if self.first[i].issue == -1 and self.inst_status[i].issue != -1:
+                self.first[i].issue = self.inst_status[i].issue
+            if self.first[i].exe == -1 and self.inst_status[i].exe != -1:
+                self.first[i].exe = self.inst_status[i].exe
+            if self.first[i].wr== -1 and self.inst_status[i].wr != -1:
+                self.first[i].wr= self.inst_status[i].wr
+
     def __step(self):
         self.controller.run_one_cycle()
-
-    def is_finished(self):
-        return False
+        self.__update_first()
 
     def run(self, cycles:int=-1):
         self.__check_runnable()
@@ -130,13 +151,18 @@ class Simulator:
         self.print_rs_status()
         self.print_reg_status()
 
+    def use_default_setting(self):
+        self.init_rs(6, 3, 3)
+        self.init_fu(3, 2, 2)
+        self.add_reg(32)
+
 def main():
     sim = Simulator()
     sim.init_rs(6, 3, 3)
     sim.init_fu(3, 2, 2)
     sim.add_reg(32)
     sim.read_inst('test0.nel')
-    for _ in range(25):
+    for _ in range(8):
         sim.step()
     sim.print_status()
 
