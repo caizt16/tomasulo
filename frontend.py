@@ -7,6 +7,7 @@ class Window:
         self.root = tk.Tk()
         self.sim = Simulator()
         self.sim.use_default_setting()
+        self.sim_list = []
 
         def start_simulating(event):
             self.sim.read_inst(path_entry.get())
@@ -71,6 +72,16 @@ class Window:
         step_button = tk.Button(self.root, highlightbackground='#3E4149', text='first', command=self.first)
         step_button.pack()
 
+        def to_cycle(event):
+            #tmp = self.sim
+            self.sim = self.sim_list[int(cycle_entry.get())-1]
+            self.update()
+            #self.sim = tmp
+
+        cycle_entry = tk.Entry(self.root)
+        cycle_entry.bind('<Return>', to_cycle)
+        cycle_entry.pack()
+
         self.init_inst()
         self.init_rs()
         self.init_reg()
@@ -78,11 +89,11 @@ class Window:
         self.update()
 
     def step(self):
-        self.sim.step()
+        self.sim_list.append(self.sim.step())
         self.update()
 
     def run(self):
-        self.sim.run()
+        self.sim_list.extend(self.sim.run())
         self.update()
 
     def first(self):

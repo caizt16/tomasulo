@@ -1,3 +1,4 @@
+from copy import deepcopy
 from utils import *
 from status import *
 from controller import *
@@ -101,20 +102,24 @@ class Simulator:
     def run(self, cycles:int=-1):
         self.__check_runnable()
 
+        sim_list = []
         cnt = 0
         while cycles:
             if self.is_finished():
+                return sim_list
                 return cnt
             self.__step()
+            sim_list.append(deepcopy(self))
             cnt += 1
             cycles -= 1
-        return cnt
+        return sim_list
 
     def step(self):
         self.__check_runnable()
         if self.is_finished():
             return False
         self.__step()
+        return deepcopy(self)
 
     def print_inst_status(self):
         print('\t\t\t\tissue\texe\twr\n')
